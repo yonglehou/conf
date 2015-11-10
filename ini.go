@@ -1,3 +1,17 @@
+/*
+import (
+	"github.com/berkaroad/conf"
+)
+
+func main(){
+	config := conf.LoadInitConfig("~/config1.ini")
+	config.Get("command", "concurrent_num")
+	config.Set("command", "concurrent_num", "3")
+	if err := config.Reload(); err == nil {
+
+	}
+}
+*/
 package conf
 
 import (
@@ -5,6 +19,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -17,7 +32,7 @@ type iniConfig struct {
 func LoadIniConfig(filepath string) Config {
 	c := new(iniConfig)
 	c.filepath = filepath
-	if err := c.Load(); err == nil {
+	if err := c.Reload(); err == nil {
 		consoleLog.Printf("[info] Load file \"%s\" success.\n", c.filepath)
 	} else {
 		consoleLog.Printf("[error] Load file \"%s\" error:%s!\n", c.filepath, err.Error())
@@ -38,6 +53,15 @@ func (self *iniConfig) Get(section, name string) string {
 		}
 	}
 	return ""
+}
+
+func (self *iniConfig) GetInt(section, name string) int {
+	str := self.Get(section, name)
+	if val, err := strconv.Atoi(str); err == nil {
+		return val
+	} else {
+		return 0
+	}
 }
 
 func (self *iniConfig) Set(section, name, value string) {
@@ -71,7 +95,7 @@ func (self *iniConfig) Set(section, name, value string) {
 	}
 }
 
-func (self *iniConfig) Load() error {
+func (self *iniConfig) Reload() error {
 	file, err := os.OpenFile(self.filepath, os.O_CREATE, 0644)
 	if err != nil {
 		return err
@@ -106,7 +130,7 @@ func (self *iniConfig) Load() error {
 			}
 			value := strings.TrimSpace(line[i+1 : len(line)])
 			data[section][strings.TrimSpace(line[0:i])] = value
-			if self.uniquappend(section) == true {
+			if self.uniqueAppend(section) == true {
 				self.conflist = append(self.conflist, data)
 			}
 		}
@@ -115,8 +139,7 @@ func (self *iniConfig) Load() error {
 	return nil
 }
 
-//Ban repeated appended to the slice method
-func (self *iniConfig) uniquappend(conf string) bool {
+func (self *iniConfig) uniqueAppend(conf string) bool {
 	for _, v := range self.conflist {
 		for k, _ := range v {
 			if k == conf {
