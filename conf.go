@@ -6,6 +6,7 @@ import (
 )
 
 var consoleLog = log.New(os.Stdout, "[conf] ", log.LstdFlags)
+var DEBUG bool = false
 
 type Config interface {
 	Get(section, name string) string

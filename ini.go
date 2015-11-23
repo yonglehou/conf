@@ -33,9 +33,11 @@ func LoadIniConfig(filepath string) Config {
 	c := new(iniConfig)
 	c.filepath = filepath
 	if err := c.Reload(); err == nil {
-		consoleLog.Printf("[info] Load file \"%s\" success.\n", c.filepath)
+		if DEBUG {
+			consoleLog.Printf("[info] Load file \"%s\" success.\n", c.filepath)
+		}
 	} else {
-		consoleLog.Printf("[error] Load file \"%s\" error:%s!\n", c.filepath, err.Error())
+		consoleLog.Panicf("[error] Load file \"%s\" error:%s!\n", c.filepath, err.Error())
 	}
 	return c
 }
@@ -46,7 +48,9 @@ func (self *iniConfig) Get(section, name string) string {
 		for _, v := range data {
 			for key, value := range v {
 				if key == section {
-					consoleLog.Printf("[info] Get config:%s.%s.\n", section, name)
+					if DEBUG {
+						consoleLog.Printf("[info] Get config:%s.%s.\n", section, name)
+					}
 					return value[name]
 				}
 			}
@@ -91,7 +95,9 @@ func (self *iniConfig) Set(section, name, value string) {
 			conf[section][name] = value
 			self.conflist = append(self.conflist, conf)
 		}
-		consoleLog.Printf("[info] Set config:%s.%s=%s.\n", section, name, value)
+		if DEBUG {
+			consoleLog.Printf("[info] Set config:%s.%s=%s.\n", section, name, value)
+		}
 	}
 }
 
